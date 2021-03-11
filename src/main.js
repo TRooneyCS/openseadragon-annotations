@@ -133,14 +133,12 @@ OpenSeadragon.Viewer.prototype.shutdownAnnotations = ifPluginIsActive(function s
 // annotations object. This allows the user to interact with the
 // annotations stored in the data store: get the data, reset it, etc.
 
-const get = ifPluginIsActive(() => Store.getAll());
+OpenSeadragon.Viewer.prototype.get = ifPluginIsActive(() => Store.getAll());
 
-const set = ifPluginIsActive((annotations) => {
+OpenSeadragon.Viewer.prototype.set = ifPluginIsActive((annotations) => {
   fillCanvasWith(annotations, Dispatcher);
 });
 
-const clean = ifPluginIsActive(() => {
+OpenSeadragon.Viewer.prototype.clean = ifPluginIsActive(() => {
   cleanCanvas(Dispatcher);
 });
-
-export { get, set, clean };
