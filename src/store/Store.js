@@ -60,7 +60,7 @@ class AppStore extends OpenSeadragon.EventSource {
   }
 
   getAnnotationById(id) {
-    return data.annotations.find(annotation => annotation[1].id == id);
+    return data.annotations.find(annotation => annotation[1].id.toString() === id);
   }
 
   createId() {
@@ -107,6 +107,12 @@ Dispatcher.register((action) => {
     case 'ANNOTATIONS_UPDATE_LAST':
       // extend is from jQuery. Updates properties from one object to another.
       extend(Store.getLast()[1], action.update);
+      break;
+
+    case 'ANNOTATIONS_DELETE':
+      const annotation = Store.getAnnotationById(action.annotationId);
+      const index = data.annotations.indexOf(annotation);
+      data.annotations.splice(index, 1);
       break;
 
     case 'ANNOTATIONS_RESET':

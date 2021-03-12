@@ -2,14 +2,13 @@ import Store from '../store/Store';
 import Dispatcher from '../dispatcher/Dispatcher';
 
 const anchorFactory = {
-  getAnchor(cx, cy, annotationId, anchorNumber, Store) {
+  getAnchor(cx, cy, annotationId, anchorNumber) {
     return [
       'circle',
       {
         cx: `${cx}`,
         cy: `${cy}`,
-        r: 1.5,
-        annotationId: annotationId,
+        r: .5,
         anchorNumber: anchorNumber,
         cursor: 'pointer',
         stroke: 'white',
@@ -18,7 +17,7 @@ const anchorFactory = {
         'fill': 'gray',
         'fill-opacity': 0.5,
         // 'vector-effect': 'non-scaling-stroke',
-        onPointerDown: SelectionTool.handleAnchorMouseDown.bind(this),
+        onPointerDown: Select.handleAnchorMouseDown.bind(this),
       },
     ];
   },
@@ -26,15 +25,11 @@ const anchorFactory = {
 
 class AppSelectionTool {
 	handleAnnotationMouseDown(e) {
-		if (Store.getMode() == 'SELECTANNOTATION') {
-			// get annotationIndex
-			const selectedId = e.srcElement.attributes.id.value;
-			console.log("handleAnnotationMouseDown selectedId", selectedId);
-			// store selected id
+		if (Store.getMode() === 'SELECTANNOTATION') {
+			const selectedId = e.target.attributes.id.value;
 			Store.setLastSelected(selectedId);
 
 			const selected = Store.getAnnotationById(selectedId);
-			console.log("selected", selected);
 			Dispatcher.dispatch({
 				type: 'ACTIVITY_UPDATE',
 				inProgress: true,
@@ -45,11 +40,11 @@ class AppSelectionTool {
 				case 'line':
 					Dispatcher.dispatch({
 						type: 'ANNOTATIONS_CREATE',
-						annotation: anchorFactory.getAnchor(selected[1].x1, selected[1].y1, selectedId, 1, Store),
+						annotation: anchorFactory.getAnchor(selected[1].x1, selected[1].y1, selectedId, 1),
 					});
 					Dispatcher.dispatch({
 						type: 'ANNOTATIONS_CREATE',
-						annotation: anchorFactory.getAnchor(selected[1].x2, selected[1].y2, selectedId, 2, Store),
+						annotation: anchorFactory.getAnchor(selected[1].x2, selected[1].y2, selectedId, 2),
 					});
 					break;
 				// add rect, ellipse..
@@ -57,15 +52,24 @@ class AppSelectionTool {
 					break;
 			}
 		}
-	};
+		if (Store.getMode() === 'ERASER') {
+      Dispatcher.dispatch({
+        type: 'ACTIVITY_UPDATE',
+        inProgress: false,
+      });
+      Dispatcher.dispatch({
+        type: 'ANNOTATIONS_DELETE',
+        annotationId: e.target.attributes.id.value,
+      });
+    }
+	}
 
 	handleAnchorMouseDown(e) {
 		console.log("handleAnchorMouseDown", e);
-		console.log("handleAnchorMouseDown annotationid", e.srcElement.attributes.annotationId.value);
-		console.log("handleAnchorMouseDown anchornumber", e.srcElement.attributes.anchorNumber.value);
+		console.log("handleAnchorMouseDown anchorNumber", e.target.attributes.anchorNumber.value);
 	}
 
 }
 
-const SelectionTool = new AppSelectionTool();
-export default SelectionTool;
+const Select = new AppSelectionTool();
+export default Select;

@@ -13,7 +13,7 @@ export default function move(x, y, Dispatcher, Store) {
         }
       }
       break;
-    case 'DRAWLINE':
+    case 'LINE':
       if (Store.isActivityInProgress()) {
         const last = Store.getLast();
         if (last && last[0] === 'line') {
