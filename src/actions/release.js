@@ -7,7 +7,12 @@ export default function release(Dispatcher, Store) {
         inProgress: false,
       });
       break;
-
+    case 'DRAWLINE':
+      Dispatcher.dispatch({
+        type: 'ACTIVITY_UPDATE',
+        inProgress: false,
+      });
+      break;
     default:
       break;
 

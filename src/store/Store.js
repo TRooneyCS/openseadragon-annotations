@@ -11,6 +11,8 @@ const data = {
   height: 0,
   activityInProgress: false,
   annotations: [],
+  lastSelectedId: -1,
+  author: '',
 };
 
 class AppStore extends OpenSeadragon.EventSource {
@@ -52,6 +54,38 @@ class AppStore extends OpenSeadragon.EventSource {
   isActivityInProgress() {
     return data.activityInProgress;
   }
+
+  getAnnotationByIndex(annotationIndex) {
+    return data.annotations[annotationIndex];
+  }
+
+  getAnnotationById(id) {
+    return data.annotations.find(annotation => annotation[1].id == id);
+  }
+
+  createId() {
+    return Math.floor(Math.random() * 10000);
+  }
+
+  getLastSelected() {
+    return data.lastSelectedId;
+  }
+
+  setLastSelected(selectedId) {
+    data.lastSelectedId = selectedId;
+  }
+
+  cleanAnchors() {
+    data.annotations = data.annotations.filter(annotation => !annotation[1].anchorNumber);
+  }
+
+  setAuthor(author) {
+    data.author = author;
+  }
+
+  getAuthor() {
+    return data.author;
+  }
 }
 
 const Store = new AppStore();
@@ -71,6 +105,7 @@ Dispatcher.register((action) => {
       break;
 
     case 'ANNOTATIONS_UPDATE_LAST':
+      // extend is from jQuery. Updates properties from one object to another.
       extend(Store.getLast()[1], action.update);
       break;
 
@@ -84,6 +119,10 @@ Dispatcher.register((action) => {
 
     case 'INITIALIZE':
       extend(data, action.options);
+      break;
+
+    case 'EDIT':
+      //extend(Store.getAnnotationById(action.id)[1], action.update);
       break;
 
     default:
