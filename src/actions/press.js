@@ -1,12 +1,14 @@
+import Store from '../store/Store';
+
 const shapesFactory = {
   getPath(x, y) {
     return [
       'path',
       {
-        fill: 'none',
+        fill: Store.getStyle().fill || 'none',
         d: `M${x} ${y}`,
-        stroke: 'red',
-        'stroke-width': 3,
+        stroke: Store.getStyle().color || 'red',
+        'stroke-width': Store.getStyle().width || 3,
         'stroke-linejoin': 'round',
         'stroke-linecap': 'round',
         'vector-effect': 'non-scaling-stroke',
@@ -15,8 +17,8 @@ const shapesFactory = {
   },
 };
 
-export default function press(x, y, Dispatcher, Store) {
-  switch (Store.getMode()) {
+export default function press(x, y, Dispatcher, store) {
+  switch (store.getMode()) {
 
     case 'DRAW':
       Dispatcher.dispatch({
