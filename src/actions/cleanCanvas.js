@@ -7,4 +7,8 @@ export default function cleanCanvas(Dispatcher) {
     type: 'ANNOTATIONS_RESET',
     annotations: [],
   });
+  Dispatcher.dispatch({
+    type: 'ANCHOR_NUMBER_UPDATE',
+    selectedAnchorNumber: 0,
+  });
 }

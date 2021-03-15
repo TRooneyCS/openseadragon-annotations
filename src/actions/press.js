@@ -38,7 +38,6 @@ const shapesFactory = {
 
 export default function press(x, y, Dispatcher, Store) {
   switch (Store.getMode()) {
-
     case 'DRAW':
       Dispatcher.dispatch({
         type: 'ACTIVITY_UPDATE',
@@ -60,18 +59,10 @@ export default function press(x, y, Dispatcher, Store) {
       });
       break;
     case 'SELECTANNOTATION':
-      // Dispatcher.dispatch({
-      //   type: 'ACTIVITY_UPDATE',
-      //   inProgress: true,
-      // });
-      // // TODO crear los anchors
-
-      // Dispatcher.dispatch({
-      //   type: 'ANNOTATIONS_CREATE',
-      //   annotation: shapesFactory.getAnchor(cx, cy, r, anochorToId, anchorNumber, Store),
-      // });
-      console.log("press mode:SELECTANNOTATION");
-
+      Dispatcher.dispatch({
+        type: 'MODE_UPDATE',
+        mode: 'MOVE',
+      });
       break;
 
     default:

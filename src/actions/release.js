@@ -8,6 +8,12 @@ export default function release(Dispatcher, Store) {
         inProgress: false,
       });
       break;
+    case 'SELECTANNOTATION':
+      Dispatcher.dispatch({
+        type: 'ANCHOR_NUMBER_UPDATE',
+        selectedAnchorNumber: 0,
+      });
+      break;
     default:
       break;
 

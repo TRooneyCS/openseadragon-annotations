@@ -26,11 +26,22 @@ export default function move(x, y, Dispatcher, Store) {
       break;
     case 'SELECTANNOTATION':
       if (Store.isActivityInProgress()) {
-        // TODO
-        // if there is an annotation selected
-        // get the selected anchor
-        // get the annotation id from the anchor
-        // dispatch the update for the annotation
+        const selectedAnnotation = Store.getSelectedAnnotation();
+        if(selectedAnnotation && selectedAnnotation[0] == "line") {
+          const selectedAnchorNumber = Store.getSelectedAnchorNumber();
+          if(selectedAnchorNumber) {
+            Dispatcher.dispatch({
+              type: 'EDIT',
+              update: selectedAnchorNumber == 1? { x1: `${x}`, y1: `${y}` } : { x2: `${x}`, y2: `${y}` },
+            });
+            Dispatcher.dispatch({
+              type: 'ANCHOR_UPDATE',
+              update: { cx: `${x}`, cy: `${y}` },
+            });
+          } else {
+            // Drag entire annotation by dx and dy
+          }
+        }
       }
       break;
 
