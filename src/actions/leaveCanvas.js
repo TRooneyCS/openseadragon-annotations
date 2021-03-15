@@ -18,6 +18,10 @@ export default function leaveCanvas(Dispatcher, Store) {
         type: 'ACTIVITY_UPDATE',
         inProgress: false,
       });
+      Dispatcher.dispatch({
+        type: 'ANCHOR_NUMBER_UPDATE',
+        selectedAnchorNumber: 0,
+      });
       break;
     
     default:

@@ -11,7 +11,8 @@ const data = {
   height: 0,
   activityInProgress: false,
   annotations: [],
-  lastSelectedId: -1,
+  selectedId: 0,
+  selectedAnchorNumber : 0,
   author: '',
 };
 
@@ -67,14 +68,21 @@ class AppStore extends OpenSeadragon.EventSource {
     return Math.floor(Math.random() * 10000);
   }
 
-  getLastSelected() {
-    return data.lastSelectedId;
+  getSelectedId() {
+    return data.selectedId;
   }
 
-  setLastSelected(selectedId) {
-    data.lastSelectedId = selectedId;
+  setSelectedId(selectedId) {
+    data.selectedId = selectedId;
   }
 
+  getSelectedAnnotation() {
+    if(data.selectedId != 0) {
+      return this.getAnnotationById(data.selectedId);
+    }
+    return null;
+  }
+  
   cleanAnchors() {
     data.annotations = data.annotations.filter(annotation => !annotation[1].anchorNumber);
   }
@@ -86,6 +94,17 @@ class AppStore extends OpenSeadragon.EventSource {
   getAuthor() {
     return data.author;
   }
+
+  getSelectedAnchorNumber() {
+    return data.selectedAnchorNumber;
+  }
+
+  getSelectedAnchor() {
+    if(data.selectedAnchorNumber != 0) {
+      return data.annotations.find(annotation => annotation[1].anchorNumber == data.selectedAnchorNumber);
+    }
+    return null;
+  }
 }
 
 const Store = new AppStore();
@@ -94,6 +113,10 @@ Dispatcher.register((action) => {
   switch (action.type) {
     case 'MODE_UPDATE':
       data.mode = action.mode;
+      if (action.mode != 'SELECTANNOTATION') {
+        data.selectedId = 0;
+        Store.cleanAnchors();
+      }
       break;
 
     case 'ACTIVITY_UPDATE':
@@ -122,7 +145,15 @@ Dispatcher.register((action) => {
       break;
 
     case 'EDIT':
-      //extend(Store.getAnnotationById(action.id)[1], action.update);
+      extend(Store.getSelectedAnnotation()[1], action.update);
+      break;
+
+    case 'ANCHOR_NUMBER_UPDATE':
+      data.selectedAnchorNumber = action.selectedAnchorNumber;
+      break;
+
+    case 'ANCHOR_UPDATE':
+      extend(Store.getSelectedAnchor()[1], action.update);
       break;
 
     default:

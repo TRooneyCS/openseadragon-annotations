@@ -1,5 +1,6 @@
 import Store from '../store/Store';
 import Dispatcher from '../dispatcher/Dispatcher';
+import selectMode from '../actions/selectMode';
 
 const anchorFactory = {
   getAnchor(cx, cy, annotationId, anchorNumber, Store) {
@@ -8,16 +9,16 @@ const anchorFactory = {
       {
         cx: `${cx}`,
         cy: `${cy}`,
-        r: 1.5,
+        r: 1,
         annotationId: annotationId,
         anchorNumber: anchorNumber,
         cursor: 'pointer',
         stroke: 'white',
-        'stroke-width': 0.5,
+        'stroke-width': 0.8,
         'stroke-linecap': 'round',
         'fill': 'gray',
         'fill-opacity': 0.5,
-        // 'vector-effect': 'non-scaling-stroke',
+        'vector-effect': 'non-scaling-stroke',
         onPointerDown: SelectionTool.handleAnchorMouseDown.bind(this),
       },
     ];
@@ -26,45 +27,49 @@ const anchorFactory = {
 
 class AppSelectionTool {
 	handleAnnotationMouseDown(e) {
-		if (Store.getMode() == 'SELECTANNOTATION') {
-			// get annotationIndex
-			const selectedId = e.srcElement.attributes.id.value;
-			console.log("handleAnnotationMouseDown selectedId", selectedId);
-			// store selected id
-			Store.setLastSelected(selectedId);
+		e.stopImmediatePropagation();
+		selectMode('SELECTANNOTATION', Dispatcher, Store);
+    const selectedId = e.srcElement.attributes.id.value;
+    Store.setSelectedId(selectedId);
+    const selected = Store.getAnnotationById(selectedId);
 
-			const selected = Store.getAnnotationById(selectedId);
-			console.log("selected", selected);
+    Dispatcher.dispatch({
+      type: 'ACTIVITY_UPDATE',
+      inProgress: true,
+    });
+    Store.cleanAnchors();
+
+    switch (selected[0]) {
+      case 'line':
+        Dispatcher.dispatch({
+          type: 'ANNOTATIONS_CREATE',
+          annotation: anchorFactory.getAnchor(selected[1].x1, selected[1].y1, selectedId, 1, Store),
+        });
+        Dispatcher.dispatch({
+          type: 'ANNOTATIONS_CREATE',
+          annotation: anchorFactory.getAnchor(selected[1].x2, selected[1].y2, selectedId, 2, Store),
+        });
+        break;
+      // add rect, ellipse..
+      default:
+        break;
+    }
+	};
+
+	handleAnchorMouseDown(e) {
+		e.stopImmediatePropagation();
+
+		if (Store.getMode() == 'SELECTANNOTATION') {
 			Dispatcher.dispatch({
 				type: 'ACTIVITY_UPDATE',
 				inProgress: true,
 			});
-			Store.cleanAnchors();
-
-			switch (selected[0]) {
-				case 'line':
-					Dispatcher.dispatch({
-						type: 'ANNOTATIONS_CREATE',
-						annotation: anchorFactory.getAnchor(selected[1].x1, selected[1].y1, selectedId, 1, Store),
-					});
-					Dispatcher.dispatch({
-						type: 'ANNOTATIONS_CREATE',
-						annotation: anchorFactory.getAnchor(selected[1].x2, selected[1].y2, selectedId, 2, Store),
-					});
-					break;
-				// add rect, ellipse..
-				default:
-					break;
-			}
+			Dispatcher.dispatch({
+				type: 'ANCHOR_NUMBER_UPDATE',
+				selectedAnchorNumber: e.srcElement.attributes.anchorNumber.value,
+			});
 		}
-	};
-
-	handleAnchorMouseDown(e) {
-		console.log("handleAnchorMouseDown", e);
-		console.log("handleAnchorMouseDown annotationid", e.srcElement.attributes.annotationId.value);
-		console.log("handleAnchorMouseDown anchornumber", e.srcElement.attributes.anchorNumber.value);
 	}
-
 }
 
 const SelectionTool = new AppSelectionTool();
