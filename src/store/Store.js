@@ -13,6 +13,8 @@ const data = {
   annotations: [],
   lastSelectedId: -1,
   author: '',
+  undoStack: [],
+  redoStack: [],
 };
 
 class AppStore extends OpenSeadragon.EventSource {
@@ -102,6 +104,8 @@ Dispatcher.register((action) => {
 
     case 'ANNOTATIONS_CREATE':
       data.annotations.push(action.annotation);
+      data.undoStack.push(action.annotation[1].id.toString());
+      data.redoStack = [];
       break;
 
     case 'ANNOTATIONS_UPDATE_LAST':
@@ -110,9 +114,15 @@ Dispatcher.register((action) => {
       break;
 
     case 'ANNOTATIONS_DELETE':
-      const annotation = Store.getAnnotationById(action.annotationId);
-      const index = data.annotations.indexOf(annotation);
-      data.annotations.splice(index, 1);
+      const annotation = deleteAnnotation(action.annotationId);
+      if (annotation) {
+        data.undoStack.push(annotation);
+        data.redoStack = [];
+      }
+      break;
+
+    case 'ANNOTATIONS_UNDO_REDO':
+      undoRedo(action.mode);
       break;
 
     case 'ANNOTATIONS_RESET':
@@ -138,3 +148,22 @@ Dispatcher.register((action) => {
 });
 
 export default Store;
+
+function deleteAnnotation(id) {
+  const annotation = Store.getAnnotationById(id);
+  const index = data.annotations.indexOf(annotation);
+  data.annotations.splice(index, 1);
+  return annotation;
+}
+
+function undoRedo(mode) {
+  const action = mode < 1 ? data.undoStack.pop() : data.redoStack.pop();
+  if (!action) return;
+  if (Store.getAnnotationById(action)) {
+    const annotation = deleteAnnotation(action);
+    mode < 1 ? data.redoStack.push(annotation) : data.undoStack.push(annotation);
+  } else {
+    data.annotations.push(action);
+    mode < 1 ? data.redoStack.push(action[1].id.toString()) : data.undoStack.push(action[1].id.toString());
+  }
+}

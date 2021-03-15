@@ -9,6 +9,7 @@ import selectMode from './actions/selectMode';
 import cleanCanvas from './actions/cleanCanvas';
 import fillCanvasWith from './actions/fillCanvasWith';
 import zoom from './actions/zoom';
+import undoRedo from "./actions/undoRedo";
 
 const controls = controlClasses.map(Control => new Control());
 
@@ -153,6 +154,14 @@ OpenSeadragon.Viewer.prototype.cleanAnnotations = ifPluginIsActive(function clea
 
 OpenSeadragon.Viewer.prototype.setAuthor = ifPluginIsActive(function setAuthor(author) {
   Store.setAuthor(author);
+});
+
+OpenSeadragon.Viewer.prototype.undo = ifPluginIsActive(function undo() {
+  undoRedo(0, Dispatcher);
+});
+
+OpenSeadragon.Viewer.prototype.redo = ifPluginIsActive(function redo() {
+  undoRedo(1, Dispatcher);
 });
 
 export { get, set, clean };
