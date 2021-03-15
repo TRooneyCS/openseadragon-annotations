@@ -1,12 +1,11 @@
 import Move from './Move';
-import DrawLine from './DrawLine';
+import Line from './Line';
 import SelectAnnotation from './SelectAnnotation';
-// import Draw from './Draw';
+import Eraser from "./Eraser";
 
 export default [
   Move,
-  DrawLine,
+  Line,
   SelectAnnotation,
-  // more tools here
-  // Draw,
+  Eraser
 ];

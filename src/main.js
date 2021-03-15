@@ -95,6 +95,10 @@ OpenSeadragon.Viewer.prototype.areAnnotationsActive = function areActive() {
   return isPluginActive;
 };
 
+OpenSeadragon.Viewer.prototype.selectMode = ifPluginIsActive((mode) => {
+  selectMode(mode, Dispatcher, Store);
+});
+
 OpenSeadragon.Viewer.prototype.startDrawing = ifPluginIsActive(function draw() {
   selectMode('DRAW', Dispatcher, Store);
 });

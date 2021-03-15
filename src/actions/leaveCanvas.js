@@ -2,13 +2,8 @@ export default function leaveCanvas(Dispatcher, Store) {
   switch (Store.getMode()) {
 
     case 'DRAW':
-      Dispatcher.dispatch({
-        type: 'ACTIVITY_UPDATE',
-        inProgress: false,
-      });
-      break;
-    case 'DRAWLINE':
-      Dispatcher.dispatch({
+    case 'LINE':
+	  Dispatcher.dispatch({
         type: 'ACTIVITY_UPDATE',
         inProgress: false,
       });
@@ -23,7 +18,7 @@ export default function leaveCanvas(Dispatcher, Store) {
         selectedAnchorNumber: 0,
       });
       break;
-    
+
     default:
       break;
 

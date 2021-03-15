@@ -3,7 +3,7 @@ import Dispatcher from '../dispatcher/Dispatcher';
 import selectMode from '../actions/selectMode';
 
 const anchorFactory = {
-  getAnchor(cx, cy, annotationId, anchorNumber, Store) {
+  getAnchor(cx, cy, annotationId, anchorNumber) {
     return [
       'circle',
       {
@@ -19,7 +19,7 @@ const anchorFactory = {
         'fill': 'gray',
         'fill-opacity': 0.5,
         'vector-effect': 'non-scaling-stroke',
-        onPointerDown: SelectionTool.handleAnchorMouseDown.bind(this),
+        onPointerDown: Select.handleAnchorMouseDown.bind(this),
       },
     ];
   },
@@ -28,8 +28,16 @@ const anchorFactory = {
 class AppSelectionTool {
 	handleAnnotationMouseDown(e) {
 		e.stopImmediatePropagation();
-		selectMode('SELECTANNOTATION', Dispatcher, Store);
-    const selectedId = e.srcElement.attributes.id.value;
+    if(Store.getMode() === 'ERASER') {
+      Select.eraseAnnotation(e);
+    } else {
+      Select.selectAnnotation(e);
+    }
+	};
+
+  selectAnnotation(e) {
+    selectMode('SELECTANNOTATION', Dispatcher, Store);
+    const selectedId = e.target.attributes.id.value;
     Store.setSelectedId(selectedId);
     const selected = Store.getAnnotationById(selectedId);
 
@@ -54,7 +62,18 @@ class AppSelectionTool {
       default:
         break;
     }
-	};
+  }
+
+  eraseAnnotation(e) {
+    Dispatcher.dispatch({
+      type: 'ACTIVITY_UPDATE',
+      inProgress: false,
+    });
+    Dispatcher.dispatch({
+      type: 'ANNOTATIONS_DELETE',
+      annotationId: e.target.attributes.id.value,
+    });
+  }
 
 	handleAnchorMouseDown(e) {
 		e.stopImmediatePropagation();
@@ -66,11 +85,12 @@ class AppSelectionTool {
 			});
 			Dispatcher.dispatch({
 				type: 'ANCHOR_NUMBER_UPDATE',
-				selectedAnchorNumber: e.srcElement.attributes.anchorNumber.value,
+				selectedAnchorNumber: e.target.attributes.anchorNumber.value,
 			});
+
 		}
 	}
 }
 
-const SelectionTool = new AppSelectionTool();
-export default SelectionTool;
+const Select = new AppSelectionTool();
+export default Select;
