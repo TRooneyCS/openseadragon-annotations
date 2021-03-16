@@ -102,7 +102,6 @@ class Annotations extends Component {
         width: '100%',
         height: '100%',
         style: svgStyles,
-        onMouseDown: this.handleMouseDown.bind(this),
         onPointerDown: this.handleMouseDown.bind(this),
         onMouseLeave: this.handleMouseLeave.bind(this),
         onMouseMove: this.handleMouseMove.bind(this),

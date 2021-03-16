@@ -154,3 +154,13 @@ OpenSeadragon.Viewer.prototype.setFill = ifPluginIsActive((fill) => {
 OpenSeadragon.Viewer.prototype.setWidth = ifPluginIsActive((width) => {
   Store.setWidth(width);
 });
+
+OpenSeadragon.Viewer.prototype.cleanAnnotations = ifPluginIsActive(function cleanAnnotations() {
+  cleanCanvas(Dispatcher);
+});
+
+OpenSeadragon.Viewer.prototype.setAuthor = ifPluginIsActive(function setAuthor(author) {
+  Store.setAuthor(author);
+});
+
+export { get, set, clean };

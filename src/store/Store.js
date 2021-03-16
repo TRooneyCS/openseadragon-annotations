@@ -16,6 +16,9 @@ const data = {
   },
   activityInProgress: false,
   annotations: [],
+  selectedId: 0,
+  selectedAnchorNumber : 0,
+  author: '',
 };
 
 class AppStore extends OpenSeadragon.EventSource {
@@ -73,6 +76,56 @@ class AppStore extends OpenSeadragon.EventSource {
   isActivityInProgress() {
     return data.activityInProgress;
   }
+
+  getAnnotationByIndex(annotationIndex) {
+    return data.annotations[annotationIndex];
+  }
+
+  getAnnotationById(id) {
+    return data.annotations.find(annotation => annotation[1].id.toString() === id);
+  }
+
+  createId() {
+    return Math.floor(Math.random() * 10000);
+  }
+
+  getSelectedId() {
+    return data.selectedId;
+  }
+
+  setSelectedId(selectedId) {
+    data.selectedId = selectedId;
+  }
+
+  getSelectedAnnotation() {
+    if(data.selectedId != 0) {
+      return this.getAnnotationById(data.selectedId);
+    }
+    return null;
+  }
+  
+  cleanAnchors() {
+    data.annotations = data.annotations.filter(annotation => !annotation[1].anchorNumber);
+  }
+
+  setAuthor(author) {
+    data.author = author;
+  }
+
+  getAuthor() {
+    return data.author;
+  }
+
+  getSelectedAnchorNumber() {
+    return data.selectedAnchorNumber;
+  }
+
+  getSelectedAnchor() {
+    if(data.selectedAnchorNumber != 0) {
+      return data.annotations.find(annotation => annotation[1].anchorNumber == data.selectedAnchorNumber);
+    }
+    return null;
+  }
 }
 
 const Store = new AppStore();
@@ -81,6 +134,10 @@ Dispatcher.register((action) => {
   switch (action.type) {
     case 'MODE_UPDATE':
       data.mode = action.mode;
+      if (action.mode != 'SELECTANNOTATION') {
+        data.selectedId = 0;
+        Store.cleanAnchors();
+      }
       break;
 
     case 'ACTIVITY_UPDATE':
@@ -92,7 +149,14 @@ Dispatcher.register((action) => {
       break;
 
     case 'ANNOTATIONS_UPDATE_LAST':
+      // extend is from jQuery. Updates properties from one object to another.
       extend(Store.getLast()[1], action.update);
+      break;
+
+    case 'ANNOTATIONS_DELETE':
+      const annotation = Store.getAnnotationById(action.annotationId);
+      const index = data.annotations.indexOf(annotation);
+      data.annotations.splice(index, 1);
       break;
 
     case 'ANNOTATIONS_RESET':
@@ -105,6 +169,18 @@ Dispatcher.register((action) => {
 
     case 'INITIALIZE':
       extend(data, action.options);
+      break;
+
+    case 'EDIT':
+      extend(Store.getSelectedAnnotation()[1], action.update);
+      break;
+
+    case 'ANCHOR_NUMBER_UPDATE':
+      data.selectedAnchorNumber = action.selectedAnchorNumber;
+      break;
+
+    case 'ANCHOR_UPDATE':
+      extend(Store.getSelectedAnchor()[1], action.update);
       break;
 
     default:
