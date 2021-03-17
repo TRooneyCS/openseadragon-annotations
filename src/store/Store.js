@@ -16,6 +16,9 @@ const data = {
   author: '',
   undoStack: [],
   redoStack: [],
+  selectedCoords: [0, 0],
+  boundingClientRect: null,
+  canMove: false,
 };
 
 class AppStore extends OpenSeadragon.EventSource {
@@ -107,6 +110,77 @@ class AppStore extends OpenSeadragon.EventSource {
     }
     return null;
   }
+
+  getAnchorByAnnotationId(annotationId) {
+    return data.annotations.find(annotation => annotation[1].annotationId == annotationId);
+  }
+
+  getSelectedCoords() {
+    return data.selectedCoords;
+  }
+
+  setBoundingClientRect(rect) {
+    data.boundingClientRect = rect;
+  }
+
+  getBoundingClientRect() {
+    return data.boundingClientRect;
+  }
+
+  getCoords(e) {
+    const rect = Store.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+    const x = 100 * offsetX / rect.width;
+    const y = 100 * offsetY / rect.height;
+    return [
+      Math.round(x * 100) / 100,
+      Math.round(y * 100) / 100,
+    ];
+  }
+
+  completeEdit() {
+    const selected = Store.getSelectedAnnotation();
+    switch (selected[0]) {
+      case 'line':
+        Store.getSelectedAnnotation()[1].x1 = parseFloat(selected[1].x1) + parseFloat(selected[1].dx);
+        Store.getSelectedAnnotation()[1].y1 = parseFloat(selected[1].y1) + parseFloat(selected[1].dy);
+        Store.getSelectedAnnotation()[1].x2 = parseFloat(selected[1].x2) + parseFloat(selected[1].dx);
+        Store.getSelectedAnnotation()[1].y2 = parseFloat(selected[1].y2) + parseFloat(selected[1].dy);
+        extend(Store.getSelectedAnnotation()[1], {transform: 'translate(0 0)', dx: '0', dy: '0'});
+        break;
+      default:
+        break;    
+    }
+  }
+
+  editAnchors(dx, dy) {
+    const selected = Store.getSelectedAnnotation();
+    switch (selected[0]) {
+      case 'line':
+        const cx1 = parseFloat(selected[1].x1) + dx;
+        const cy1 = parseFloat(selected[1].y1) + dy;
+        const cx2 = parseFloat(selected[1].x2) + dx;
+        const cy2 = parseFloat(selected[1].y2) + dy;
+        extend(data.annotations.find(annotation => annotation[1].anchorNumber == '1')[1], {cx: `${cx1}`, cy: `${cy1}`});
+        extend(data.annotations.find(annotation => annotation[1].anchorNumber == '2')[1], {cx: `${cx2}`, cy: `${cy2}`});
+        break;
+      default:
+        break;
+    }
+  }
+
+  setCanMove(canMove) {
+    data.canMove = canMove;
+  }
+
+  getCanMove() {
+    return data.canMove;
+  }
+
+  changeAnnotationCursor(cursor) {
+    data.annotations.forEach(element => element[1].cursor = `${cursor}`);
+  }
 }
 
 const Store = new AppStore();
@@ -118,6 +192,20 @@ Dispatcher.register((action) => {
       if (action.mode != 'SELECTANNOTATION') {
         data.selectedId = 0;
         Store.cleanAnchors();
+      }
+      switch (action.mode) {
+        case 'SELECTANNOTATION':
+          Store.changeAnnotationCursor('move');
+          break;
+        case 'MOVE':
+          Store.changeAnnotationCursor('pointer');
+          break;
+        case 'ERASER':
+          Store.changeAnnotationCursor('pointer');
+          break;
+  
+        default:
+          break;
       }
       break;
 
@@ -132,7 +220,6 @@ Dispatcher.register((action) => {
       break;
 
     case 'ANNOTATIONS_UPDATE_LAST':
-      // extend is from jQuery. Updates properties from one object to another.
       extend(Store.getLast()[1], action.update);
       break;
 
@@ -168,14 +255,26 @@ Dispatcher.register((action) => {
       extend(Store.getSelectedAnnotation()[1], action.update);
       break;
 
+    case 'EDIT_COMPLETED':
+      Store.completeEdit();
+      break;
+
     case 'ANCHOR_NUMBER_UPDATE':
       data.selectedAnchorNumber = action.selectedAnchorNumber;
       break;
 
-    case 'ANCHOR_UPDATE':
+    case 'SELECTED_ANCHOR_UPDATE':
       extend(Store.getSelectedAnchor()[1], action.update);
       break;
 
+    case 'ANCHORS_EDIT':
+      Store.editAnchors(action.update.dx, action.update.dy);
+      break;
+
+    case 'SELECTED_COORDS_UPDATE':
+      data.selectedCoords = action.update;
+      break;
+    
     default:
       break;
   }

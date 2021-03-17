@@ -39,12 +39,22 @@ class AppSelectionTool {
     selectMode('SELECTANNOTATION', Dispatcher, Store);
     const selectedId = e.target.attributes.id.value;
     Store.setSelectedId(selectedId);
-    const selected = Store.getAnnotationById(selectedId);
+    
+    // if the annotation wasn't selected before, prevent drag
+    if(!Store.getAnchorByAnnotationId(selectedId)) {
+      Store.setCanMove(false);
+    }
 
+    const selected = Store.getAnnotationById(selectedId);
     Dispatcher.dispatch({
       type: 'ACTIVITY_UPDATE',
       inProgress: true,
     });
+    Dispatcher.dispatch({
+      type: 'SELECTED_COORDS_UPDATE',
+      update: Store.getCoords(e),
+    });
+    
     Store.cleanAnchors();
 
     switch (selected[0]) {
@@ -90,6 +100,12 @@ class AppSelectionTool {
 
 		}
 	}
+
+  handleAnnotationMouseUp(e) {
+    if(Store.getMode() == 'SELECTANNOTATION') {
+      Store.setCanMove(true);
+    }
+  }
 }
 
 const Select = new AppSelectionTool();
