@@ -56,7 +56,7 @@ OpenSeadragon.Viewer.prototype.initializeAnnotations = function init(cb) {
 
     controls.forEach((control) => {
       this.addControl(control.btn.element, {
-        anchor: ControlAnchor.BOTTOM_LEFT,
+        anchor: ControlAnchor.TOP_LEFT,
       });
     });
 

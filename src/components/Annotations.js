@@ -62,19 +62,18 @@ class Annotations extends Component {
     if (Store.notInMoveMode()) {
       e.stopPropagation();
       release(Dispatcher, Store);
+      if(Store.getMode() == 'SELECTANNOTATION') {
+        const rect = this.base.getBoundingClientRect();
+        Store.setBoundingClientRect(rect);
+        Store.setCanMove(true);
+      }
     }
   }
 
   coords(e) {
     const rect = this.base.getBoundingClientRect();
-    const offsetX = e.clientX - rect.left;
-    const offsetY = e.clientY - rect.top;
-    const x = 100 * offsetX / rect.width;
-    const y = 100 * offsetY / rect.height;
-    return [
-      Math.round(x * 100) / 100,
-      Math.round(y * 100) / 100,
-    ];
+    Store.setBoundingClientRect(rect);
+    return Store.getCoords(e);
   }
 
   handleMouseDown(e) {
@@ -87,7 +86,7 @@ class Annotations extends Component {
   handleMouseMove(e) {
     if (Store.notInMoveMode()) {
       e.stopPropagation();
-      move(...this.coords(e), Dispatcher, Store);
+      move(...this.coords(e), Dispatcher, Store, e);
     }
   }
 
@@ -105,7 +104,6 @@ class Annotations extends Component {
         onPointerDown: this.handleMouseDown.bind(this),
         onMouseLeave: this.handleMouseLeave.bind(this),
         onMouseMove: this.handleMouseMove.bind(this),
-        onMouseUp: this.handleMouseUp.bind(this),
         onPointerUp: this.handleMouseUp.bind(this),
       },
       this.state.annotations.map(createAnnotations),

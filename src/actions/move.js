@@ -1,4 +1,4 @@
-export default function move(x, y, Dispatcher, Store) {
+export default function move(x, y, Dispatcher, Store, e) {
   switch (Store.getMode()) {
 
     case 'DRAW':
@@ -35,11 +35,23 @@ export default function move(x, y, Dispatcher, Store) {
               update: selectedAnchorNumber == 1? { x1: `${x}`, y1: `${y}` } : { x2: `${x}`, y2: `${y}` },
             });
             Dispatcher.dispatch({
-              type: 'ANCHOR_UPDATE',
+              type: 'SELECTED_ANCHOR_UPDATE',
               update: { cx: `${x}`, cy: `${y}` },
             });
           } else {
             // Drag entire annotation by dx and dy
+            if(Store.getCanMove()) {
+              const dx = Store.getCoords(e)[0] - Store.getSelectedCoords()[0];
+              const dy = Store.getCoords(e)[1] - Store.getSelectedCoords()[1];
+              Dispatcher.dispatch({
+                type: 'EDIT',
+                update: { transform: `translate(${dx} ${dy})`, dx: `${dx}`, dy: `${dy}`}
+              });
+              Dispatcher.dispatch({
+                type: 'ANCHORS_EDIT',
+                update: {dx: dx, dy: dy},
+              });
+            }
           }
         }
       }

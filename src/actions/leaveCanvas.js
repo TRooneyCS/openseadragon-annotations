@@ -17,6 +17,9 @@ export default function leaveCanvas(Dispatcher, Store) {
         type: 'ANCHOR_NUMBER_UPDATE',
         selectedAnchorNumber: 0,
       });
+      Dispatcher.dispatch({
+        type: 'EDIT_COMPLETED',
+      });
       break;
 
     default:
