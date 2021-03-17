@@ -14,6 +14,8 @@ const data = {
   selectedId: 0,
   selectedAnchorNumber : 0,
   author: '',
+  undoStack: [],
+  redoStack: [],
   selectedCoords: [0, 0],
   boundingClientRect: null,
   canMove: false,
@@ -85,7 +87,7 @@ class AppStore extends OpenSeadragon.EventSource {
     }
     return null;
   }
-  
+
   cleanAnchors() {
     data.annotations = data.annotations.filter(annotation => !annotation[1].anchorNumber);
   }
@@ -213,6 +215,8 @@ Dispatcher.register((action) => {
 
     case 'ANNOTATIONS_CREATE':
       data.annotations.push(action.annotation);
+      if (action.annotation[1].id) data.undoStack.push(['create', action.annotation[1].id.toString()]);
+      data.redoStack = [];
       break;
 
     case 'ANNOTATIONS_UPDATE_LAST':
@@ -220,9 +224,15 @@ Dispatcher.register((action) => {
       break;
 
     case 'ANNOTATIONS_DELETE':
-      const annotation = Store.getAnnotationById(action.annotationId);
-      const index = data.annotations.indexOf(annotation);
-      data.annotations.splice(index, 1);
+      const annotation = deleteAnnotation(action.annotationId);
+      if (annotation) {
+        data.undoStack.push(['delete', annotation]);
+        data.redoStack = [];
+      }
+      break;
+
+    case 'ANNOTATIONS_UNDO_REDO':
+      undoRedo(action.mode);
       break;
 
     case 'ANNOTATIONS_RESET':
@@ -238,6 +248,10 @@ Dispatcher.register((action) => {
       break;
 
     case 'EDIT':
+      if (getLastUndoId() !== Store.getSelectedId()) {
+        const selected = Store.getSelectedAnnotation();
+        data.undoStack.push(['edit', [selected[0], Object.assign({}, selected[1])]]);
+      }
       extend(Store.getSelectedAnnotation()[1], action.update);
       break;
 
@@ -268,3 +282,38 @@ Dispatcher.register((action) => {
 });
 
 export default Store;
+
+function deleteAnnotation(id) {
+  const annotation = Store.getAnnotationById(id);
+  const index = data.annotations.indexOf(annotation);
+  data.annotations.splice(index, 1);
+  return annotation;
+}
+
+function undoRedo(mode) {
+  const action = mode < 1 ? data.undoStack.pop() : data.redoStack.pop();
+  const writeStack = mode < 1 ? data.redoStack : data.undoStack;
+
+  if (!action) return;
+  switch (action[0]) {
+    case 'create':
+      const deletedAnnotation = deleteAnnotation(action[1]);
+      writeStack.push(['delete', deletedAnnotation]);
+      break;
+    case 'delete':
+      data.annotations.push(action[1]);
+      writeStack.push(['create', action[1][1].id.toString()]);
+      break;
+    case 'edit':
+      Store.cleanAnchors();
+      const editedAnnotation = Store.getAnnotationById(action[1][1].id.toString());
+      writeStack.push(['edit', [editedAnnotation[0], Object.assign({}, editedAnnotation[1])]]);
+      extend(editedAnnotation[1], action[1][1]);
+  }
+}
+
+function getLastUndoId() {
+  if (data.undoStack.length === 0) return -1;
+  const id = data.undoStack[data.undoStack.length-1][1][1].id;
+  return id ? id.toString() : -1;
+}
