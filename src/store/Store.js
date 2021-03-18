@@ -9,6 +9,11 @@ const data = {
   // constant over time as the image scales up and down
   width: 0,
   height: 0,
+  style: {
+    color: 'red',
+    width: 3,
+    fill: 'none'
+  },
   activityInProgress: false,
   annotations: [],
   selectedId: 0,
@@ -32,7 +37,7 @@ class AppStore extends OpenSeadragon.EventSource {
     return data.width * data.zoom;
   }
 
-  // idem for the heigth
+  // idem for the height
   getHeight() {
     return data.height * data.zoom;
   }
@@ -43,6 +48,22 @@ class AppStore extends OpenSeadragon.EventSource {
 
   getMode() {
     return data.mode;
+  }
+
+  getStyle() {
+    return data.style;
+  }
+
+  setColor(color) {
+    data.style.color = color;
+  }
+
+  setFill(fill) {
+    data.style.fill = fill;
+  }
+
+  setWidth(width) {
+    data.style.width = width;
   }
 
   inMoveMode() {

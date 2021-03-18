@@ -134,18 +134,26 @@ OpenSeadragon.Viewer.prototype.shutdownAnnotations = ifPluginIsActive(function s
   isPluginActive = false;
 });
 
-// get(), set() and clean() are exported and available in the viewer's
-// annotations object. This allows the user to interact with the
-// annotations stored in the data store: get the data, reset it, etc.
+OpenSeadragon.Viewer.prototype.get = ifPluginIsActive(() => Store.getAll());
 
-const get = ifPluginIsActive(() => Store.getAll());
-
-const set = ifPluginIsActive((annotations) => {
+OpenSeadragon.Viewer.prototype.set = ifPluginIsActive((annotations) => {
   fillCanvasWith(annotations, Dispatcher);
 });
 
-const clean = ifPluginIsActive(() => {
+OpenSeadragon.Viewer.prototype.clean = ifPluginIsActive(() => {
   cleanCanvas(Dispatcher);
+});
+
+OpenSeadragon.Viewer.prototype.setColor = ifPluginIsActive((color) => {
+  Store.setColor(color);
+});
+
+OpenSeadragon.Viewer.prototype.setFill = ifPluginIsActive((fill) => {
+  Store.setFill(fill);
+});
+
+OpenSeadragon.Viewer.prototype.setWidth = ifPluginIsActive((width) => {
+  Store.setWidth(width);
 });
 
 OpenSeadragon.Viewer.prototype.cleanAnnotations = ifPluginIsActive(function cleanAnnotations() {
