@@ -1,17 +1,17 @@
 import Control from './Control';
-import drawGroupHover from '../../img/draw_grouphover.png';
-import drawHover from '../../img/draw_hover.png';
-import drawPressed from '../../img/draw_pressed.png';
-import drawRest from '../../img/draw_rest.png';
+import eraserGroupHover from '../../img/eraser_grouphover.png';
+import eraserHover from '../../img/eraser_hover.png';
+import eraserPressed from '../../img/eraser_pressed.png';
+import eraserRest from '../../img/eraser_rest.png';
 
 export default class Eraser extends Control {
   constructor() {
     super({
-      Tooltip: 'Eraser',
-      srcRest: drawRest,
-      srcGroup: drawGroupHover,
-      srcHover: drawHover,
-      srcDown: drawPressed,
+      tooltip: 'Eraser',
+      srcRest: eraserRest,
+      srcGroup: eraserGroupHover,
+      srcHover: eraserHover,
+      srcDown: eraserPressed,
     });
   }
 }

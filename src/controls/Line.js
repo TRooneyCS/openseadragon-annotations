@@ -1,17 +1,17 @@
 import Control from './Control';
-import drawGroupHover from '../../img/draw_grouphover.png';
-import drawHover from '../../img/draw_hover.png';
-import drawPressed from '../../img/draw_pressed.png';
-import drawRest from '../../img/draw_rest.png';
+import lineGroupHover from '../../img/line_grouphover.png';
+import lineHover from '../../img/line_hover.png';
+import linePressed from '../../img/line_pressed.png';
+import lineRest from '../../img/line_rest.png';
 
 export default class Line extends Control {
   constructor() {
     super({
-      Tooltip: 'Line',
-      srcRest: drawRest,
-      srcGroup: drawGroupHover,
-      srcHover: drawHover,
-      srcDown: drawPressed,
+      tooltip: 'Line',
+      srcRest: lineRest,
+      srcGroup: lineGroupHover,
+      srcHover: lineHover,
+      srcDown: linePressed,
     });
   }
 }
