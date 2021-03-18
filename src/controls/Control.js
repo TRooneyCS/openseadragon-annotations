@@ -5,7 +5,7 @@ import Dispatcher from '../dispatcher/Dispatcher';
 
 export default class Control {
   constructor(options) {
-    this.mode = options.Tooltip.toUpperCase();
+    this.mode = options.tooltip.toUpperCase();
     this.btn = new Button(extend({
       onClick: this.onClick,
     }, options));
@@ -30,8 +30,8 @@ export default class Control {
   }
 
   onClick(e) {
-    if (e.eventSource.Tooltip) {
-      selectMode(e.eventSource.Tooltip.toUpperCase(), Dispatcher, Store);
+    if (e.eventSource.tooltip) {
+      selectMode(e.eventSource.tooltip.toUpperCase(), Dispatcher, Store);
     }
   }
 }

@@ -7,7 +7,7 @@ import drawRest from '../../img/draw_rest.png';
 export default class Draw extends Control {
   constructor() {
     super({
-      Tooltip: 'Draw',
+      tooltip: 'Draw',
       srcRest: drawRest,
       srcGroup: drawGroupHover,
       srcHover: drawHover,

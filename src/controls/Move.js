@@ -7,7 +7,7 @@ import moveRest from '../../img/move_rest.png';
 export default class Move extends Control {
   constructor() {
     super({
-      Tooltip: 'Move',
+      tooltip: 'Move',
       srcRest: moveRest,
       srcGroup: moveGroupHover,
       srcHover: moveHover,
