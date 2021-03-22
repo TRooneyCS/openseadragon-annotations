@@ -3,9 +3,17 @@ export default function leaveCanvas(Dispatcher, Store) {
 
     case 'DRAW':
     case 'LINE':
-	  Dispatcher.dispatch({
+      Dispatcher.dispatch({
         type: 'ACTIVITY_UPDATE',
         inProgress: false,
+      });
+    case 'RECTANGLE':
+	    Dispatcher.dispatch({
+        type: 'ACTIVITY_UPDATE',
+        inProgress: false,
+      });
+      Dispatcher.dispatch({
+        type: 'RECTANGLE_UPDATE_COMPLETE',
       });
       break;
     case 'SELECTANNOTATION':

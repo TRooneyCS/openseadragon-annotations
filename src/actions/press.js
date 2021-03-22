@@ -38,6 +38,32 @@ const shapesFactory = {
       },
     ];
   },
+  getRect(x, y, width, height, id, author) {
+    return [
+      'rect',
+      {
+        x: `${x}`,
+        y: `${y}`,
+        xi: `${x}`,
+        yi: `${y}`,
+        width: `${width}`,
+        height: `${height}`,
+        id: id,
+        author: author,
+        transform: 'translate(0 0)',
+        dx: 0,
+        dy: 0,
+        cursor: 'pointer',
+        stroke: 'red',
+        'fill': 'none',
+        'stroke-width': 0.5,
+        'stroke-linecap': 'round',
+        // 'vector-effect': 'non-scaling-stroke',
+        onPointerDown: Select.handleAnnotationMouseDown.bind(this),
+        onPointerUp: Select.handleAnnotationMouseUp.bind(this),
+      },
+    ];
+  },
 };
 
 export default function press(x, y, Dispatcher, Store) {
@@ -60,6 +86,16 @@ export default function press(x, y, Dispatcher, Store) {
       Dispatcher.dispatch({
         type: 'ANNOTATIONS_CREATE',
         annotation: shapesFactory.getLine(x, y, Store.createId(), Store.getAuthor()),
+      });
+      break;
+    case 'RECTANGLE':
+      Dispatcher.dispatch({
+        type: 'ACTIVITY_UPDATE',
+        inProgress: true,
+      });
+      Dispatcher.dispatch({
+        type: 'ANNOTATIONS_CREATE',
+        annotation: shapesFactory.getRect(x, y, 0, 0, Store.createId(), Store.getAuthor()),
       });
       break;
     case 'SELECTANNOTATION':

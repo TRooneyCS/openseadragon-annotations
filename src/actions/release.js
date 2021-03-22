@@ -7,6 +7,14 @@ export default function release(Dispatcher, Store) {
         type: 'ACTIVITY_UPDATE',
         inProgress: false,
       });
+    case 'RECTANGLE':
+      Dispatcher.dispatch({
+        type: 'ACTIVITY_UPDATE',
+        inProgress: false,
+      });
+      Dispatcher.dispatch({
+        type: 'RECTANGLE_UPDATE_COMPLETE',
+      });
       break;
     case 'SELECTANNOTATION':
       Dispatcher.dispatch({
@@ -19,6 +27,9 @@ export default function release(Dispatcher, Store) {
       });
       Dispatcher.dispatch({
         type: 'EDIT_COMPLETED',
+      });
+      Dispatcher.dispatch({
+        type: 'RECTANGLE_UPDATE_COMPLETE',
       });
       break;
     default:

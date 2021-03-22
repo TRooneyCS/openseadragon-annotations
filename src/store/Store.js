@@ -88,6 +88,7 @@ class AppStore extends OpenSeadragon.EventSource {
     return null;
   }
 
+  /** Remove all anchors from annotations array */
   cleanAnchors() {
     data.annotations = data.annotations.filter(annotation => !annotation[1].anchorNumber);
   }
@@ -113,6 +114,13 @@ class AppStore extends OpenSeadragon.EventSource {
 
   getAnchorByAnnotationId(annotationId) {
     return data.annotations.find(annotation => annotation[1].annotationId == annotationId);
+  }
+
+  getAnchorByNumber(number) {
+    if(data.selectedAnchorNumber != 0) {
+      return data.annotations.find(annotation => annotation[1].anchorNumber == number);
+    }
+    return null; 
   }
 
   getSelectedCoords() {
@@ -149,6 +157,11 @@ class AppStore extends OpenSeadragon.EventSource {
         Store.getSelectedAnnotation()[1].y2 = parseFloat(selected[1].y2) + parseFloat(selected[1].dy);
         extend(Store.getSelectedAnnotation()[1], {transform: 'translate(0 0)', dx: '0', dy: '0'});
         break;
+      case 'rect':
+        Store.getSelectedAnnotation()[1].x = parseFloat(selected[1].x) + parseFloat(selected[1].dx);
+        Store.getSelectedAnnotation()[1].y = parseFloat(selected[1].y) + parseFloat(selected[1].dy);
+        extend(Store.getSelectedAnnotation()[1], {transform: 'translate(0 0)', dx: '0', dy: '0'});
+        break;
       default:
         break;    
     }
@@ -156,18 +169,37 @@ class AppStore extends OpenSeadragon.EventSource {
 
   editAnchors(dx, dy) {
     const selected = Store.getSelectedAnnotation();
+    var cx1, cx2, cx3, cx4, cy1, cy2, cy3, cy4;
     switch (selected[0]) {
       case 'line':
-        const cx1 = parseFloat(selected[1].x1) + dx;
-        const cy1 = parseFloat(selected[1].y1) + dy;
-        const cx2 = parseFloat(selected[1].x2) + dx;
-        const cy2 = parseFloat(selected[1].y2) + dy;
-        extend(data.annotations.find(annotation => annotation[1].anchorNumber == '1')[1], {cx: `${cx1}`, cy: `${cy1}`});
-        extend(data.annotations.find(annotation => annotation[1].anchorNumber == '2')[1], {cx: `${cx2}`, cy: `${cy2}`});
+        cx1 = parseFloat(selected[1].x1) + dx;
+        cy1 = parseFloat(selected[1].y1) + dy;
+        cx2 = parseFloat(selected[1].x2) + dx;
+        cy2 = parseFloat(selected[1].y2) + dy;
+        Store.extendAnchor('1', cx1, cy1);
+        Store.extendAnchor('2', cx2, cy2);
+        break;
+      case 'rect':
+        cx1 = parseFloat(selected[1].x) + dx;
+        cy1 = parseFloat(selected[1].y) + dy;
+        cx2 = parseFloat(selected[1].x) + parseFloat(selected[1].width) + dx;
+        cy2 = parseFloat(selected[1].y) + dy;
+        cx3 = parseFloat(selected[1].x) + parseFloat(selected[1].width) + dx;
+        cy3 = parseFloat(selected[1].y) + parseFloat(selected[1].height) + dy;
+        cx4 = parseFloat(selected[1].x) + dx;
+        cy4 = parseFloat(selected[1].y) + parseFloat(selected[1].height) + dy;
+        Store.extendAnchor('1', cx1, cy1);
+        Store.extendAnchor('2', cx2, cy2);
+        Store.extendAnchor('3', cx3, cy3);
+        Store.extendAnchor('4', cx4, cy4);
         break;
       default:
         break;
     }
+  }
+
+  extendAnchor(anchorNumber, cx, cy) {
+    extend(data.annotations.find(annotation => annotation[1].anchorNumber == anchorNumber)[1], {cx: `${cx}`, cy: `${cy}`});
   }
 
   setCanMove(canMove) {
@@ -264,7 +296,19 @@ Dispatcher.register((action) => {
       break;
 
     case 'SELECTED_ANCHOR_UPDATE':
-      extend(Store.getSelectedAnchor()[1], action.update);
+      switch (Store.getSelectedAnnotation()[0]) {
+        case 'line':
+          extend(Store.getSelectedAnchor()[1], action.update);
+          break;
+        case 'rect':
+          extend(Store.getAnchorByNumber(1)[1], action.update.a1);
+          extend(Store.getAnchorByNumber(2)[1], action.update.a2);
+          extend(Store.getAnchorByNumber(3)[1], action.update.a3);
+          extend(Store.getAnchorByNumber(4)[1], action.update.a4);
+          break;
+        default:
+          break;
+      }
       break;
 
     case 'ANCHORS_EDIT':
@@ -274,7 +318,17 @@ Dispatcher.register((action) => {
     case 'SELECTED_COORDS_UPDATE':
       data.selectedCoords = action.update;
       break;
-    
+
+    case 'RECTANGLE_UPDATE_COMPLETE':
+      if(Store.getLast()[0] === 'rect') {
+        Store.getLast()[1].xi = Store.getLast()[1].x;
+        Store.getLast()[1].yi = Store.getLast()[1].y;
+      }
+      if(Store.getSelectedAnnotation() && Store.getSelectedAnnotation()[0] === 'rect') {
+        Store.getSelectedAnnotation()[1].xi = Store.getSelectedAnnotation()[1].x;
+        Store.getSelectedAnnotation()[1].yi = Store.getSelectedAnnotation()[1].y;
+      }
+      break;
     default:
       break;
   }

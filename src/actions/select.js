@@ -40,7 +40,8 @@ class AppSelectionTool {
     const selectedId = e.target.attributes.id.value;
     Store.setSelectedId(selectedId);
     
-    // if the annotation wasn't selected before, prevent drag
+    /** If the annotation wasn't selected before, 
+     * prevent drag to avoid miscalculations if user moved the frame */ 
     if(!Store.getAnchorByAnnotationId(selectedId)) {
       Store.setCanMove(false);
     }
@@ -59,19 +60,30 @@ class AppSelectionTool {
 
     switch (selected[0]) {
       case 'line':
-        Dispatcher.dispatch({
-          type: 'ANNOTATIONS_CREATE',
-          annotation: anchorFactory.getAnchor(selected[1].x1, selected[1].y1, selectedId, 1, Store),
-        });
-        Dispatcher.dispatch({
-          type: 'ANNOTATIONS_CREATE',
-          annotation: anchorFactory.getAnchor(selected[1].x2, selected[1].y2, selectedId, 2, Store),
-        });
+        Select.createAnchor(selected[1].x1, selected[1].y1, selectedId, 1);
+        Select.createAnchor(selected[1].x2, selected[1].y2, selectedId, 2);
         break;
-      // add rect, ellipse..
+      case 'rect':
+        const x1 = selected[1].x;
+        const y1 = selected[1].y;
+        const x2 = parseFloat(selected[1].x) + parseFloat(selected[1].width);
+        const y2 = parseFloat(selected[1].y) + parseFloat(selected[1].height);
+        Select.createAnchor(x1, y1, selectedId, 1);
+        Select.createAnchor(x2, y1, selectedId, 2);
+        Select.createAnchor(x2, y2, selectedId, 3);
+        Select.createAnchor(x1, y2, selectedId, 4);
+
+        break;
       default:
         break;
     }
+  }
+
+  createAnchor(x, y, selectedId, number) {
+    Dispatcher.dispatch({
+      type: 'ANNOTATIONS_CREATE',
+      annotation: anchorFactory.getAnchor(x, y, selectedId, number, Store),
+    });
   }
 
   eraseAnnotation(e) {
@@ -97,7 +109,6 @@ class AppSelectionTool {
 				type: 'ANCHOR_NUMBER_UPDATE',
 				selectedAnchorNumber: e.target.attributes.anchorNumber.value,
 			});
-
 		}
 	}
 
